@@ -48,7 +48,7 @@ app.get('/api', function (req, res) {
     console.log(req.query.what);
     const abc = req.query.what;
 
-    client.get("http://localhost:5000?what=" + abc + ' from node',
+    client.get("http://localhost:5000/a?what=" + abc + ' from node',
         function (data, response) {
             // parsed response body as js object
             console.log(data.toString());

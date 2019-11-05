@@ -10,7 +10,7 @@
     <ProviderName>Contoso</ProviderName>
     <DefaultLocale>en-us</DefaultLocale>
     <!--This is the name shown in the Word UI.-->
-    <DisplayName DefaultValue="Word Redact add-in" />
+    <DisplayName DefaultValue="Bengali Spell Checker" />
     <Description DefaultValue="Shows how to create an add-in that searches, highlights and redacts text." />
     <!--Icon for your add-in. Used on installation screens and the add-ins dialog -->
     <IconUrl DefaultValue="https://localhost:8088/InsertSpec_32x32_px.png" />
