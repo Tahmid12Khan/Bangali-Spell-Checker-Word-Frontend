@@ -13,7 +13,7 @@
                 }
             });
 
-            // Use this to check whether the new API is supported in the Word client...
+            // Use this to check whether the new API is supported in the Word client.......
             // The createDocument method call is in the 1.3 requirement set. 
             // The 1.3 requirement set check is not implemented in preview. 
             // The 1.2 API requirement set check is the minimum requirement check in Word. 
@@ -23,6 +23,7 @@
                 $('#start').click(RedactAddin.run);
                 $('#spell').click(RedactAddin.spell);
                 $('#refresh').click(RedactAddin.refresh);
+                $('#ignore').click(RedactAddin.ignore);
             }
             else {                
                 // Just letting you know that this code will not work with your version of Word.

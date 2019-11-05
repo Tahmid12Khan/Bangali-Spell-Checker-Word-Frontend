@@ -7,13 +7,13 @@ let current_word;
 let paragraphs;
 let correct_word;
 let temp_correct_word;
+let error = false;
 let temp = {};
 const delimiters = ' ,.:;()!@#$%^&*{}-_+=|?/"' + "'";
 const remove_strategy = [];
 delimiters.split("").forEach((item) => {
     remove_strategy.push(item);
 });
-
 
 
 async function tryCatch(callback) {
@@ -62,12 +62,16 @@ const checker = async () => {
         console.log("here");
 
         for (; cur_word < term.items.length; cur_word++) {
-            if (correct_word) {
+            if (error) {
+                error = false;
                 console.log(term.items.length);
-                term.items[cur_word].insertText(correct_word, "Replace");
+
                 Object.keys(temp.font).forEach((key) => {
                     term.items[cur_word].font[key] = temp.font[key];
                 });
+                if(correct_word){
+                    term.items[cur_word].insertText(correct_word, "Replace");
+                }
 
                 await word_context.sync();
                 console.log("inside " + temp.font.color);
@@ -78,29 +82,33 @@ const checker = async () => {
             }
             current_word = term.items[cur_word];
             const context_words = await getContext(term, cur_word);
-            console.log(current_word.text + "-> " + context_words);
-            if (cur_word % 2 == 0) {
-                $("#select")
-                    .find("li")
-                    .remove();
-                const suggestions = await get_suggestion(current_word.text, context_words);
-                temp.font = JSON.stringify(term.items[cur_word].font);
-                temp.font = JSON.parse(temp.font);
-                // term.items[cur_word].select(Word.SelectionMode.select);
-                term.items[cur_word].font.color = "red";
-                term.items[cur_word].font.underline = Word.UnderlineType.waveHeavy;
-                await word_context.sync();
-                suggestions.forEach((suggestion) => {
-                    $("#select").append("<li>" + suggestion + "</li>");
-                });
-                $("ul li").on("click", function () {
-                    $("ul li").removeClass('selected');
-                    $(this).attr('class', 'selected');
-                    temp_correct_word = $(this).text();
 
-                });
-                return;
-            }
+            console.log(current_word.text + "-> " + context_words);
+
+            $("#select")
+                .find("li")
+                .remove();
+            $('#current_word').text(current_word.text);
+            const suggestions = await get_suggestion(current_word.text, context_words);
+            if(!error)continue;
+            error = true;
+            temp.font = JSON.stringify(term.items[cur_word].font);
+            temp.font = JSON.parse(temp.font);
+            // term.items[cur_word].select(Word.SelectionMode.select);
+            term.items[cur_word].font.color = "red";
+            term.items[cur_word].font.underline = Word.UnderlineType.waveHeavy;
+            await word_context.sync();
+            suggestions.forEach((suggestion) => {
+                $("#select").append("<li>" + suggestion + "</li>");
+            });
+            $("ul li").on("click", function () {
+                $("ul li").removeClass('selected');
+                $(this).attr('class', 'selected');
+                temp_correct_word = $(this).text();
+
+            });
+            return;
+
         }
         cur_word = 0;
     }
@@ -118,7 +126,7 @@ const request_suggestion = (word, contexts) => {
         }),
         success: function (abc) {
             console.log('ok');
-            reportWordsFound('Found status ' + abc.status + ' ' + abc.suggestions);
+            // reportWordsFound('Found status ' + abc.status + ' ' + abc.suggestions);
             return abc;
         },
         error: function (abc) {
@@ -137,6 +145,9 @@ function reportWordsFound(count) {
 const get_suggestion = async (word, contexts) => {
     const res = await request_suggestion(word, contexts);
 // direct way
+    if(res.status === 'fail'){
+        error = true;
+    }
 
     return res.suggestions;
 };
@@ -145,7 +156,9 @@ const refresh = async () => {
     cur_paragraph = 0;
     cur_word = 0;
     correct_word = false;
-    current_word = "";
+    current_word = '';
+    temp_correct_word = '';
+    error = false;
 };
 
 
@@ -177,6 +190,7 @@ async function run() {
         await word_context.sync();
     });
 }
+
 function createUrlForDialog(pageUrl, data) {
     var urlComponents = [];
     if (data) {
@@ -186,22 +200,19 @@ function createUrlForDialog(pageUrl, data) {
     }
     return window.location.protocol + '//' + window.location.host + window.location.pathname + pageUrl + (data ? "?" : "") + urlComponents.join("&");
 }
+
+const ignore = () =>{
+    run();
+};
+
 RedactAddin.createUrlForDialog = createUrlForDialog;
 
 RedactAddin.setup = setup;
 RedactAddin.run = run;
 RedactAddin.refresh = refresh;
 RedactAddin.spell = replace_wrong_word;
-
+RedactAddin.ignore = ignore;
 
 /**
  * Open the dialog to provide notification of found words.
  */
-
-
-
-
-
-
-
-
