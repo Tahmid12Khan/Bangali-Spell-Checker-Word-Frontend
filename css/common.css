@@ -59,6 +59,8 @@ p, h1, h2, h3, h4, h5, h6 {
 }
 
 ul {
+    list-style-type:none;
+    margin: 0;
     padding: 0;
 }
 
@@ -68,8 +70,21 @@ ul {
     height: 0;
 }
 
+div{
+    padding: 10px;
+}
+
 .pointerCursor {
     cursor: pointer;
+}
+button{
+    margin:auto;
+    background-color: white;
+    height: 30px;
+    width: 100px;
+    text-align: center;
+    display: block;
+    font-weight: bolder;
 }
 
 .invisible {

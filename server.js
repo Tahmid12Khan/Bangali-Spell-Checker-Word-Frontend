@@ -59,7 +59,7 @@ app.get('/api', function (req, res) {
 });
 
 app.post('/api/p', function (req, res) {
-    console.log('Here');
+    console.log('Here ');
     console.log(req.body);
     console.log(JSON.stringify(req.body, 0, 2));
     const abc = req.body.word;
@@ -69,11 +69,11 @@ app.post('/api/p', function (req, res) {
         headers: {"Content-Type": "application/json"}
     };
     const request = client.post("http://localhost:5000", args, function (data, response) {
-        console.log('Hererer ' + JSON.stringify(data, 0, 2));
+        console.log('Herer ' + JSON.stringify(data, 0, 2));
         abcc = data;
         console.log('Prepare Sending');
         res.setHeader('Content-Type', 'application/json');
-        res.send(abcc);
+        res.send(JSON.stringify(data));
     });
     request.on('error', function (err) {
         console.log('request error', err);

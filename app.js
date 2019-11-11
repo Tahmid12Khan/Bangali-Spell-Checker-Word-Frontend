@@ -13,11 +13,11 @@
                 }
             });
 
-            // Use this to check whether the new API is supported in the Word client.......
+            // Use this to check whether  the new API is supported in the Word client.......
             // The createDocument method call is in the 1.3 requirement set. 
             // The 1.3 requirement set check is not implemented in preview. 
-            // The 1.2 API requirement set check is the minimum requirement check in Word. 
-            // Update this to target the correct set after 1.3 is generally available.
+            // The 1.2 API  requirement set check is the minimum requirement check in Word.
+            // Update this to target the  correct set after 1.3 is generally available.
             if (Office.context.requirements.isSetSupported("WordApi", 1.2)) {
                 $('#setup').click(RedactAddin.setup)
                 $('#start').click(RedactAddin.run);

@@ -62,6 +62,7 @@ const checker = async () => {
         console.log("here");
 
         for (; cur_word < term.items.length; cur_word++) {
+            temp_correct_word = '';
             if (error) {
                 error = false;
                 console.log(term.items.length);
@@ -72,11 +73,9 @@ const checker = async () => {
                 if(correct_word){
                     term.items[cur_word].insertText(correct_word, "Replace");
                 }
-
                 await word_context.sync();
                 console.log("inside " + temp.font.color);
                 correct_word = "";
-
                 console.log(term.items[cur_word].font.color);
                 continue;
             }
@@ -98,9 +97,11 @@ const checker = async () => {
             term.items[cur_word].font.color = "red";
             term.items[cur_word].font.underline = Word.UnderlineType.waveHeavy;
             await word_context.sync();
+            $('#list').css("display", "");
             suggestions.forEach((suggestion) => {
                 $("#select").append("<li>" + suggestion + "</li>");
             });
+            $('#button_table').css('display', '');
             $("ul li").on("click", function () {
                 $("ul li").removeClass('selected');
                 $(this).attr('class', 'selected');
@@ -181,6 +182,7 @@ async function setup() {
 }
 
 async function run() {
+    $('#start').css('display', 'none');
     await Word.run(async (context) => {
         word_context = context;
         paragraphs = word_context.document.body.paragraphs;
@@ -212,7 +214,3 @@ RedactAddin.run = run;
 RedactAddin.refresh = refresh;
 RedactAddin.spell = replace_wrong_word;
 RedactAddin.ignore = ignore;
-
-/**
- * Open the dialog to provide notification of found words.
- */
