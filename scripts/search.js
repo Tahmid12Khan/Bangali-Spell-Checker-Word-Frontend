@@ -9,6 +9,8 @@ let correct_word;
 let temp_correct_word;
 let error = false;
 let temp = {};
+let term;
+let isRefreshClicked = false;
 const delimiters = ' ,.:;()!@#$%^&*{}-_+=|?/"' + "'";
 const remove_strategy = [];
 delimiters.split("").forEach((item) => {
@@ -41,6 +43,49 @@ const getContext = async (term, cur_index) => {
     return context_words;
 };
 
+const result_for_cur_word = async () => {
+    console.log(term.items.length);
+
+    Object.keys(temp.font).forEach((key) => {
+        term.items[cur_word].font[key] = temp.font[key];
+    });
+    if (correct_word) {
+        term.items[cur_word].insertText(correct_word, "Replace");
+    }
+    await word_context.sync();
+    console.log("inside " + temp.font.color);
+    correct_word = "";
+    console.log(term.items[cur_word].font.color);
+};
+
+const show_suggestion = (suggestions) => {
+    error = true;
+    $('#list').css("display", "");
+    suggestions.forEach((suggestion) => {
+        $("#select").append("<li>" + suggestion + "</li>");
+    });
+
+    $('#button_table').css('display', '');
+    if(suggestions.length === 0){
+        $("#select").append("<li>কোন পরামর্শ নেই</li>")
+        for(let k = 0; k < 4; k++){
+            $("#select").append("<li></li>");
+        }
+        return;
+    }
+    $("ul li").on("click", function () {
+        $("ul li").removeClass('selected');
+        $(this).attr('class', 'selected');
+        temp_correct_word = $(this).text();
+
+    });
+    $("ul li").on("dblclick", function () {
+        temp_correct_word = $(this).text();
+        replace_wrong_word();
+
+    });
+}
+
 const checker = async () => {
     console.log("Length: " + paragraphs.items.length);
     for (; cur_paragraph < paragraphs.items.length; cur_paragraph++) {
@@ -48,7 +93,6 @@ const checker = async () => {
         console.log("Cur Word:" + cur_word);
         let paragraph = paragraphs.items[cur_paragraph];
         await console.log(paragraph);
-        let term;
         try {
             term = await paragraph.split(remove_strategy, true, true);
             await term.load("text,font,style");
@@ -59,55 +103,27 @@ const checker = async () => {
             console.log(e);
             return;
         }
-        console.log("here");
 
         for (; cur_word < term.items.length; cur_word++) {
             temp_correct_word = '';
             if (error) {
                 error = false;
-                console.log(term.items.length);
-
-                Object.keys(temp.font).forEach((key) => {
-                    term.items[cur_word].font[key] = temp.font[key];
-                });
-                if(correct_word){
-                    term.items[cur_word].insertText(correct_word, "Replace");
-                }
-                await word_context.sync();
-                console.log("inside " + temp.font.color);
-                correct_word = "";
-                console.log(term.items[cur_word].font.color);
+                await result_for_cur_word();
+                if(isRefreshClicked)return;
                 continue;
             }
             current_word = term.items[cur_word];
             const context_words = await getContext(term, cur_word);
-
-            console.log(current_word.text + "-> " + context_words);
-
-            $("#select")
-                .find("li")
-                .remove();
+            $("#select").find("li").remove();
             $('#current_word').text(current_word.text);
             const suggestions = await get_suggestion(current_word.text, context_words);
-            if(!error)continue;
-            error = true;
+            if (!error) continue;
             temp.font = JSON.stringify(term.items[cur_word].font);
             temp.font = JSON.parse(temp.font);
-            // term.items[cur_word].select(Word.SelectionMode.select);
             term.items[cur_word].font.color = "red";
             term.items[cur_word].font.underline = Word.UnderlineType.waveHeavy;
             await word_context.sync();
-            $('#list').css("display", "");
-            suggestions.forEach((suggestion) => {
-                $("#select").append("<li>" + suggestion + "</li>");
-            });
-            $('#button_table').css('display', '');
-            $("ul li").on("click", function () {
-                $("ul li").removeClass('selected');
-                $(this).attr('class', 'selected');
-                temp_correct_word = $(this).text();
-
-            });
+            show_suggestion(suggestions);
             return;
 
         }
@@ -145,27 +161,31 @@ function reportWordsFound(count) {
 
 const get_suggestion = async (word, contexts) => {
     const res = await request_suggestion(word, contexts);
-// direct way
-    if(res.status === 'fail'){
+    if (res.status === 'fail') {
         error = true;
     }
-
     return res.suggestions;
 };
 
 const refresh = async () => {
+    isRefreshClicked = true;
+    await run();
+    isRefreshClicked = false;
+    term = '';
     cur_paragraph = 0;
     cur_word = 0;
     correct_word = false;
     current_word = '';
     temp_correct_word = '';
+    temp = {};
     error = false;
+    await run();
 };
 
 
 const replace_wrong_word = async () => {
     correct_word = temp_correct_word;
-    run();
+    await run();
 };
 
 async function setup() {
@@ -203,12 +223,11 @@ function createUrlForDialog(pageUrl, data) {
     return window.location.protocol + '//' + window.location.host + window.location.pathname + pageUrl + (data ? "?" : "") + urlComponents.join("&");
 }
 
-const ignore = () =>{
-    run();
+const ignore = async () => {
+    await run();
 };
 
 RedactAddin.createUrlForDialog = createUrlForDialog;
-
 RedactAddin.setup = setup;
 RedactAddin.run = run;
 RedactAddin.refresh = refresh;
