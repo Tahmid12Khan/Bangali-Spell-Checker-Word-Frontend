@@ -11,7 +11,7 @@ let error = false;
 let temp = {};
 let term;
 let isRefreshClicked = false;
-const delimiters = ' ,.:;()!@#$%^&*{}-_+=|?/"' + "'";
+const delimiters = ' ,.:;()!@#$%^&*{}-_+=|?/"।' + "'";
 const remove_strategy = [];
 delimiters.split("").forEach((item) => {
     remove_strategy.push(item);
@@ -106,6 +106,8 @@ const checker = async () => {
 
         for (; cur_word < term.items.length; cur_word++) {
             temp_correct_word = '';
+            $('#spell').hide()
+            $('#ignore').hide()
             if (error) {
                 error = false;
                 await result_for_cur_word();
@@ -118,6 +120,8 @@ const checker = async () => {
             $('#current_word').text(current_word.text);
             const suggestions = await get_suggestion(current_word.text, context_words);
             if (!error) continue;
+            $('#spell').show();
+            $('#ignore').show();
             temp.font = JSON.stringify(term.items[cur_word].font);
             temp.font = JSON.parse(temp.font);
             term.items[cur_word].font.color = "red";
@@ -128,6 +132,8 @@ const checker = async () => {
 
         }
         cur_word = 0;
+        $('#spell').hide()
+        $('#ignore').hide()
     }
 };
 
